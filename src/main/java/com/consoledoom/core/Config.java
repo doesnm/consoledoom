@@ -8,9 +8,5 @@ public class Config {
 
     public static final int MAX_HEALTH = 5;
 
-    public static final char PLAYER_SYMBOL = '@';
-    public static final char MONSTER_SYMBOL = 'M';
-    public static final char BULLET_SYMBOL = '*';
-    public static final char WALL_SYMBOL = '#';
     public static final char EMPTY_SYMBOL = ' ';
 }

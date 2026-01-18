@@ -3,8 +3,7 @@ package com.consoledoom.core;
 import com.consoledoom.arena.Arena;
 import com.consoledoom.entities.Bullet;
 import com.consoledoom.entities.Player;
-import com.consoledoom.entities.monsters.BasicMonster;
-import com.consoledoom.entities.monsters.Monster;
+import com.consoledoom.entities.monsters.*;
 import com.consoledoom.render.Renderer;
 import com.consoledoom.systems.*;
 import com.consoledoom.utils.Vec2;
@@ -70,7 +69,8 @@ public class Game {
                         case MOVE -> MovementSystem.movePlayer(player, new Vec2(input.dx, input.dy), arena);
                         case SHOOT -> weaponSystem.shoot(player, arena, bullets);
                         case QUIT -> state = GameState.GAME_OVER;
-                        case NONE -> { }
+                        case NONE -> {
+                        }
                     }
                 }
 
@@ -82,7 +82,8 @@ public class Game {
 
                 // fps cap
                 long elapsed = System.currentTimeMillis() - frameStart;
-                if (elapsed < FRAME_MS) Thread.sleep(FRAME_MS - elapsed);
+                if (elapsed < FRAME_MS)
+                    Thread.sleep(FRAME_MS - elapsed);
             }
         } finally {
             screen.stopScreen();
@@ -108,8 +109,7 @@ public class Game {
             MonsterMovementSystem.moveMonsters(
                     monsters,
                     player.getPosition(),
-                    arena
-            );
+                    arena);
             monsterMoveCooldown = MONSTER_MOVE_DELAY;
         }
 
@@ -123,33 +123,57 @@ public class Game {
         if (monsters.isEmpty()) {
             wave++;
 
-            arena.nextMap();               // map changes PER WAVE
+            arena.nextMap(); // map changes PER WAVE
             bullets.clear();
             player.setPosition(arena.getPlayerSpawn());
 
-            spawnWave();                   // spawn next wave
+            spawnWave(); // spawn next wave
         }
     }
 
-
-
     private void spawnWave() {
-        int count = 3 + wave; // grows forever
+        monsters.clear();
 
-        int spawned = 0;
+        int totalMonsters = 3 + wave * 2;
+
+        for (int i = 0; i < totalMonsters; i++) {
+            Monster monster;
+            Vec2 pos = findSpawnPosition();
+
+            if (pos == null)
+                break;
+
+            if (wave >= 5 && rng.nextDouble() < 0.2) {
+                monster = new TankMonster(pos);
+            } else if (wave >= 3 && rng.nextDouble() < 0.4) {
+                monster = new FastMonster(pos);
+            } else {
+                monster = new BasicMonster(pos);
+            }
+
+            monsters.add(monster);
+        }
+    }
+
+    private Vec2 findSpawnPosition() {
         int tries = 0;
+        final int MIN_SPAWN_DISTANCE = 7;
 
-        while (spawned < count && tries < 2000) {
-            tries++;
-
+        while (tries < 1000) {
             int x = rng.nextInt(Config.ARENA_WIDTH);
             int y = rng.nextInt(Config.ARENA_HEIGHT);
             Vec2 pos = new Vec2(x, y);
 
-            if (!arena.isWalkable(pos)) continue;
-            if (pos.equals(player.getPosition())) continue;
+            if (!arena.isWalkable(pos))
+                continue;
+            if (pos.equals(player.getPosition()))
+                continue;
 
-            // don’t spawn on another monster
+            int dist = Math.abs(pos.x - player.getPosition().x) + Math.abs(pos.y - player.getPosition().y);
+
+            if (dist < MIN_SPAWN_DISTANCE)
+                continue;
+
             boolean occupied = false;
             for (Monster m : monsters) {
                 if (m.getPosition().equals(pos)) {
@@ -157,10 +181,11 @@ public class Game {
                     break;
                 }
             }
-            if (occupied) continue;
+            if (!occupied)
+                return pos;
 
-            monsters.add(new BasicMonster(pos));
-            spawned++;
+            tries++;
         }
+        return null;
     }
 }
