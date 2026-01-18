@@ -4,8 +4,8 @@ import com.consoledoom.core.Config;
 import com.consoledoom.entities.Bullet;
 import com.consoledoom.entities.Player;
 import com.consoledoom.entities.Wall;
+import com.consoledoom.entities.monsters.Monster;
 import com.consoledoom.utils.Vec2;
-import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 
@@ -18,6 +18,7 @@ public class Renderer {
                               Player player,
                               List<Wall> walls,
                               List<Bullet> bullets,
+                              List<Monster> monsters,
                               int wave,
                               int timeSeconds) throws IOException {
 
@@ -26,7 +27,7 @@ public class Renderer {
 
         TextGraphics g = screen.newTextGraphics();
 
-        // Build a char buffer (your original logic)
+        // Build buffer
         char[][] buf = new char[Config.ARENA_HEIGHT][Config.ARENA_WIDTH];
         for (int y = 0; y < Config.ARENA_HEIGHT; y++) {
             for (int x = 0; x < Config.ARENA_WIDTH; x++) {
@@ -56,18 +57,31 @@ public class Renderer {
             if (inBounds(p.x, p.y)) buf[p.y][p.x] = b.getSymbol();
         }
 
-        // Player
+        // Monsters
+        for (Monster m : monsters) {
+            Vec2 p = m.getPosition();
+            if (inBounds(p.x, p.y)) buf[p.y][p.x] = m.getSymbol();
+        }
+
+        // Player (draw last)
         Vec2 pp = player.getPosition();
         if (inBounds(pp.x, pp.y)) buf[pp.y][pp.x] = player.getSymbol();
 
-        // HUD (top)
+        // HUD
         String hearts = renderHealth(player.getHealth());
-        String hud = String.format("SCORE: %d   %s   WAVE: %d   KILLS: %d   TIME: %02d:%02d",
-                player.getScore(), hearts, wave, player.getKills(), timeSeconds / 60, timeSeconds % 60);
-
+        String hud = String.format(
+                "SCORE: %d   %s   WAVE: %d   KILLS: %d   MONSTERS: %d   TIME: %02d:%02d",
+                player.getScore(),
+                hearts,
+                wave,
+                player.getKills(),
+                monsters.size(),
+                timeSeconds / 60,
+                timeSeconds % 60
+        );
         g.putString(0, 0, hud);
 
-        // Draw arena under HUD (starting at y=2)
+        // Draw arena under HUD
         int offsetY = 2;
         for (int y = 0; y < Config.ARENA_HEIGHT; y++) {
             g.putString(0, offsetY + y, new String(buf[y]));
@@ -76,7 +90,6 @@ public class Renderer {
         // Controls
         g.putString(0, offsetY + Config.ARENA_HEIGHT + 1, "Controls: WASD move | SPACE shoot | Q quit");
 
-        // Push to window
         screen.refresh();
     }
 
