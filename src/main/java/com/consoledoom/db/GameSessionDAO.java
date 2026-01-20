@@ -1,6 +1,5 @@
 package com.consoledoom.db;
 
-import com.consoledoom.models.GameSession;
 import com.consoledoom.models.LeaderboardEntry;
 
 import java.math.BigDecimal;
