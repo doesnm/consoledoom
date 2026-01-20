@@ -10,12 +10,16 @@ import com.consoledoom.utils.Vec2;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.consoledoom.db.Database;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class Game {
+    private final StringBuilder nameBuffer = new StringBuilder();
+    private boolean savedThisRun = false;
+    private List<Database.LeaderboardRow> cachedTop = new ArrayList<>();
 
     private GameState state = GameState.PLAYING;
 
@@ -51,34 +55,62 @@ public class Game {
         spawnWave();
 
         try {
-            while (state == GameState.PLAYING) {
+            while (true) {
                 long frameStart = System.currentTimeMillis();
 
-                // time counter
-                long now = System.currentTimeMillis();
-                if (now - lastSecondMark >= 1000) {
-                    timeSeconds++;
-                    lastSecondMark += 1000;
+                // time counter (only while playing)
+                if (state == GameState.PLAYING) {
+                    long now = System.currentTimeMillis();
+                    if (now - lastSecondMark >= 1000) {
+                        timeSeconds++;
+                        lastSecondMark += 1000;
+                    }
                 }
 
                 // input
                 KeyStroke key;
                 while ((key = screen.pollInput()) != null) {
-                    var input = InputHandler.handleKey(key, player);
-                    switch (input.action) {
-                        case MOVE -> MovementSystem.movePlayer(player, new Vec2(input.dx, input.dy), arena);
-                        case SHOOT -> weaponSystem.shoot(player, arena, bullets);
-                        case QUIT -> state = GameState.GAME_OVER;
-                        case NONE -> {
+
+                    if (state == GameState.PLAYING) {
+                        var input = InputHandler.handleKey(key, player);
+                        switch (input.action) {
+                            case MOVE -> MovementSystem.movePlayer(player, new Vec2(input.dx, input.dy), arena);
+                            case SHOOT -> weaponSystem.shoot(player, arena, bullets);
+                            case QUIT -> {
+                                state = GameState.GAME_OVER_NAME;
+                                nameBuffer.setLength(0);
+                                savedThisRun = false;
+                            }
+                            case NONE -> {}
+                        }
+                    }
+                    else if (state == GameState.GAME_OVER_NAME) {
+                        handleNameInput(key);
+                    }
+                    else if (state == GameState.LEADERBOARD) {
+                        // Q or ESC to exit
+                        if (key.getKeyType() == com.googlecode.lanterna.input.KeyType.Escape ||
+                                (key.getKeyType() == com.googlecode.lanterna.input.KeyType.Character
+                                        && (key.getCharacter() == 'q' || key.getCharacter() == 'Q'))) {
+                            return;
                         }
                     }
                 }
 
-                // update
-                tick();
 
-                // render
-                Renderer.render(screen, player, arena.getWalls(), bullets, monsters, wave, timeSeconds);
+                // update
+                if (state == GameState.PLAYING) {
+                    tick();
+                }
+
+                if (state == GameState.PLAYING) {
+                    Renderer.render(screen, player, arena.getWalls(), bullets, monsters, wave, timeSeconds);
+                } else if (state == GameState.GAME_OVER_NAME) {
+                    renderGameOverName(screen);
+                } else if (state == GameState.LEADERBOARD) {
+                    renderLeaderboard(screen);
+                }
+
 
                 // fps cap
                 long elapsed = System.currentTimeMillis() - frameStart;
@@ -88,8 +120,6 @@ public class Game {
         } finally {
             screen.stopScreen();
         }
-
-        System.out.println("Game over! Final score: " + player.getScore());
     }
 
     private void tick() {
@@ -115,9 +145,12 @@ public class Game {
 
         // player death check
         if (player.getHealth() <= 0) {
-            state = GameState.GAME_OVER;
+            state = GameState.GAME_OVER_NAME;
+            nameBuffer.setLength(0);
+            savedThisRun = false;
             return;
         }
+
 
         // ===== WAVE SYSTEM =====
         if (monsters.isEmpty()) {
@@ -188,4 +221,84 @@ public class Game {
         }
         return null;
     }
+    private void handleNameInput(KeyStroke key) {
+        var type = key.getKeyType();
+
+        if (type == com.googlecode.lanterna.input.KeyType.Character) {
+            char ch = key.getCharacter();
+            if (Character.isLetterOrDigit(ch) || ch == '_' || ch == '-') {
+                if (nameBuffer.length() < 16) nameBuffer.append(ch);
+            }
+        } else if (type == com.googlecode.lanterna.input.KeyType.Backspace) {
+            if (nameBuffer.length() > 0) nameBuffer.deleteCharAt(nameBuffer.length() - 1);
+        } else if (type == com.googlecode.lanterna.input.KeyType.Enter) {
+            String nickname = nameBuffer.toString().trim();
+            if (nickname.isEmpty()) nickname = "Player";
+
+            if (!savedThisRun) {
+                int score = player.getScore();
+                int kills = player.getKills();
+                int deaths = 1; // one run = one death
+                int finalWave = wave;
+                int timeSurvivedSec = timeSeconds;
+
+                Database.saveGameSession(nickname, score, kills, deaths, finalWave, timeSurvivedSec);
+                cachedTop = Database.topSessions(10);
+                savedThisRun = true;
+            }
+
+            state = GameState.LEADERBOARD;
+        } else if (type == com.googlecode.lanterna.input.KeyType.Escape) {
+            cachedTop = Database.topSessions(10);
+            state = GameState.LEADERBOARD;
+        }
+    }
+
+    private void renderGameOverName(Screen screen) throws Exception {
+        screen.clear();
+        var g = screen.newTextGraphics();
+
+        g.putString(2, 2, "=== GAME OVER ===");
+        g.putString(2, 4, "Final score: " + player.getScore());
+        g.putString(2, 5, "Kills: " + player.getKills());
+        g.putString(2, 6, "Wave: " + wave);
+        g.putString(2, 7, String.format("Time: %02d:%02d", timeSeconds / 60, timeSeconds % 60));
+
+        g.putString(2, 9, "Enter nickname (ENTER to save):");
+        g.putString(2, 10, "> " + nameBuffer);
+
+        g.putString(2, 12, "Backspace=delete | ESC=skip save");
+        screen.refresh();
+    }
+
+    private void renderLeaderboard(Screen screen) throws Exception {
+        screen.clear();
+        var g = screen.newTextGraphics();
+
+        g.putString(2, 2, "=== LEADERBOARD TOP 10 ===");
+        g.putString(2, 4, String.format("%-16s %6s %5s %5s %6s %5s %6s",
+                "NICK", "SCORE", "K", "D", "KD", "W", "TIME"));
+
+        int y = 6;
+        int rank = 1;
+        for (var row : cachedTop) {
+            String time = String.format("%02d:%02d", row.timeSurvivedSec / 60, row.timeSurvivedSec % 60);
+            g.putString(2, y++, String.format(
+                    "%2d) %-16s %6d %5d %5d %6s %5d %6s",
+                    rank++,
+                    row.nickname,
+                    row.score,
+                    row.kills,
+                    row.deaths,
+                    row.kd.toPlainString(),
+                    row.wave,
+                    time
+            ));
+            if (y > 20) break;
+        }
+
+        g.putString(2, y + 2, "Press Q or ESC to quit");
+        screen.refresh();
+    }
+
 }
