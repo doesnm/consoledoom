@@ -1,9 +1,10 @@
 package com.consoledoom.ui;
 
-import com.consoledoom.db.Database;
+import com.consoledoom.db.*;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
+import java.sql.SQLException;
 
 public class GameOverScreen {
     private final StringBuilder nameBuffer = new StringBuilder();
@@ -38,7 +39,19 @@ public class GameOverScreen {
             String nick = nameBuffer.toString().trim();
             if (nick.isEmpty())
                 nick = "Player";
-            Database.saveGameSession(nick, score, kills, 1, wave, timeSeconds);
+            try {
+                PlayerDAO playerDao = new PlayerDAO();
+                GameSessionDAO sessionDao = new GameSessionDAO();
+
+                int playerId = playerDao.upsertPlayer(nick);
+                sessionDao.saveSession(playerId, score, kills, 1, wave, timeSeconds);
+
+                saved = true;
+                finalNickname = nick;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                // Можно показать ошибку в UI
+            }
             finalNickname = nick;
             saved = true;
         }
