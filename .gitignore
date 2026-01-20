@@ -29,3 +29,6 @@ target/
 .idea/
 *.iml
 target/
+
+# databases
+*.sql
