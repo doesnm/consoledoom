@@ -10,7 +10,8 @@ import com.consoledoom.systems.*;
 import com.consoledoom.utils.Vec2;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
-
+import com.consoledoom.systems.MonsterAISystem;
+import com.consoledoom.systems.AiLevel;
 import java.util.List;
 import java.util.Random;
 
@@ -44,7 +45,13 @@ public class GameScreen {
         if (monsterMoveCooldown > 0) {
             monsterMoveCooldown--;
         } else {
-            MonsterMovementSystem.moveMonsters(monsters, player.getPosition(), arena);
+            AiLevel level =
+                    wave < 1 ? AiLevel.DUMB :
+                            wave < 2 ? AiLevel.NORMAL :
+                                    wave < 3 ? AiLevel.SMART :
+                                            AiLevel.GODLIKE;
+
+            MonsterAISystem.moveMonstersSmart(monsters, player.getPosition(), arena, bullets, level);
             monsterMoveCooldown = MONSTER_MOVE_DELAY;
         }
 
