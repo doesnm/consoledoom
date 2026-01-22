@@ -8,6 +8,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 public class Game {
+    private boolean running = true;
     private GameState state = GameState.PLAYING;
     private GameScreen gameScreen;
     private GameOverScreen gameOverScreen;
@@ -16,15 +17,36 @@ public class Game {
     private static final long FRAME_MS = 1000L / Config.TARGET_FPS;
 
     public void start() throws Exception {
-        Screen screen = new DefaultTerminalFactory().createScreen();
+        DefaultTerminalFactory factory = new DefaultTerminalFactory()
+                .setPreferTerminalEmulator(true)
+                .setForceAWTOverSwing(true);
+
+// Bigger font
+        java.awt.Font font = new java.awt.Font("Consolas", java.awt.Font.PLAIN, 26);
+        factory.setTerminalEmulatorFontConfiguration(
+                com.googlecode.lanterna.terminal.swing.AWTTerminalFontConfiguration.newInstance(font)
+        );
+
+        com.googlecode.lanterna.terminal.Terminal terminal = factory.createTerminalEmulator();
+
+// ✅ maximize the window if it is SwingTerminalFrame
+        if (terminal instanceof com.googlecode.lanterna.terminal.swing.SwingTerminalFrame frame) {
+            frame.setTitle("Console Doom");
+            frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+            frame.setVisible(true);
+        }
+
+        Screen screen = new com.googlecode.lanterna.screen.TerminalScreen(terminal);
         screen.startScreen();
         screen.setCursorPosition(null);
+        screen.doResizeIfNecessary();
+
 
         gameScreen = new GameScreen();
         long lastSecondMark = System.currentTimeMillis();
 
         try {
-            while (true) {
+            while (running) {
                 long frameStart = System.currentTimeMillis();
 
                 // Time update
@@ -38,6 +60,14 @@ public class Game {
                 // Input
                 KeyStroke key;
                 while ((key = screen.pollInput()) != null) {
+
+                    // ✅ ESC = quit immediately (no leaderboard)
+                    if (key.getKeyType() == com.googlecode.lanterna.input.KeyType.Escape) {
+                        running = false;
+                        break;
+                    }
+
+                    // existing state handling below...
                     if (state == GameState.PLAYING) {
                         if (isQuitKey(key)) {
                             state = GameState.GAME_OVER_NAME;
@@ -57,7 +87,7 @@ public class Game {
                         }
                     } else if (state == GameState.LEADERBOARD) {
                         if (leaderboardScreen.shouldExit(key)) {
-                            return;
+                            running = false;
                         }
                     }
                 }

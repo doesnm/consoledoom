@@ -81,7 +81,8 @@ public class Renderer {
         g.putString(0, 0, hud);
 
         g.setForegroundColor(TextColor.ANSI.CYAN);
-        g.putString(0, offsetY + Config.ARENA_HEIGHT + 1, "Controls: WASD move | SPACE shoot | Q quit");
+        g.putString(0, offsetY + Config.ARENA_HEIGHT + 1,
+                "Controls: WASD move | Arrow keys shoot | Q quit");
 
         screen.refresh();
     }
