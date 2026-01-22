@@ -11,6 +11,16 @@ public class Database {
     private static final String PASS = DbConfig.pass();
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASS);
+        Connection c = DriverManager.getConnection(URL, USER, PASS);
+
+        try (var st = c.createStatement();
+             var rs = st.executeQuery("select current_database(), inet_server_addr(), inet_server_port()")) {
+            if (rs.next()) {
+                System.out.println("DB OK: " + rs.getString(1) + " " + rs.getString(2) + ":" + rs.getInt(3));
+            }
+        } catch (Exception ignored) {
+        }
+
+        return c;
     }
 }
