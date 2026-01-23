@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class MonsterAISystem {
 
-    private static final int[][] DIRS5 = { {0,0}, {0,-1}, {0,1}, {-1,0}, {1,0} };
+    private static final int[][] DIRS5 = { { 0, 0 }, { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } };
     private static final Random rng = new Random();
 
     public static void moveMonstersSmart(
@@ -19,19 +19,30 @@ public class MonsterAISystem {
             Vec2 playerPos,
             Arena arena,
             List<Bullet> bullets,
-            AiLevel level
-    ) {
+            AiLevel level) {
         AStarPathfinder pathfinder = new AStarPathfinder(arena, monsters);
 
         for (Monster monster : monsters) {
             Vec2 cur = monster.getPosition();
-            if (cur.equals(playerPos)) continue;
+            if (cur.equals(playerPos))
+                continue;
 
             Vec2 chaseStep = pathfinder.findNextStep(cur, playerPos);
 
-            // If no dodging, keep original behavior
             if (level.horizonTicks <= 0 || level.dangerWeight <= 0) {
-                if (chaseStep != null) monster.setPosition(chaseStep);
+                if (chaseStep != null)
+                    monster.setPosition(chaseStep);
+                continue;
+            }
+
+            if (chaseStep == null) {
+                continue;
+            }
+
+            int dangerOnChaseStep = dangerAt(chaseStep, bullets, arena, level.horizonTicks);
+
+            if (dangerOnChaseStep == 0) {
+                monster.setPosition(chaseStep);
                 continue;
             }
 
@@ -40,18 +51,26 @@ public class MonsterAISystem {
 
             for (int[] d : DIRS5) {
                 Vec2 cand = new Vec2(cur.x + d[0], cur.y + d[1]);
-                if (!isWalkableForMonster(cand, monster, arena, monsters)) continue;
+                if (!isWalkableForMonster(cand, monster, arena, monsters))
+                    continue;
 
-                int dist = manhattan(cand, playerPos);
                 int danger = dangerAt(cand, bullets, arena, level.horizonTicks);
 
-                int score = -dist * 10 - danger * level.dangerWeight;
+                int pathDist = pathfinder.findPathLength(cand, playerPos);
+                if (pathDist < 0)
+                    pathDist = 1000; // нет пути - большой штраф
 
-                // Small bonus to keep chase “purposeful”
-                if (chaseStep != null && cand.equals(chaseStep)) score += 8;
+                int score = -pathDist * 10 - danger * level.dangerWeight;
 
-                // Noise so they aren’t perfect robots
-                if (level.randomnessPercent > 0) score += rng.nextInt(level.randomnessPercent + 1);
+                if (cand.equals(chaseStep))
+                    score += 15;
+
+                if (cand.equals(cur))
+                    score -= 5;
+
+                if (level.randomnessPercent > 0) {
+                    score += rng.nextInt(level.randomnessPercent + 1);
+                }
 
                 if (score > bestScore) {
                     bestScore = score;
@@ -63,22 +82,21 @@ public class MonsterAISystem {
         }
     }
 
-    private static int manhattan(Vec2 a, Vec2 b) {
-        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    }
-
     private static boolean isWalkableForMonster(Vec2 pos, Monster self, Arena arena, List<Monster> monsters) {
-        if (!arena.isInside(pos)) return false;
-        if (arena.isWall(pos)) return false;
+        if (!arena.isInside(pos))
+            return false;
+        if (arena.isWall(pos))
+            return false;
 
         for (Monster m : monsters) {
-            if (m == self) continue;
-            if (m.getPosition().equals(pos)) return false;
+            if (m == self)
+                continue;
+            if (m.getPosition().equals(pos))
+                return false;
         }
         return true;
     }
 
-    // Predict bullet positions up to 'horizon' ticks and score danger
     private static int dangerAt(Vec2 cell, List<Bullet> bullets, Arena arena, int horizon) {
         int danger = 0;
 
@@ -95,11 +113,10 @@ public class MonsterAISystem {
 
                 Vec2 next = new Vec2(x, y);
 
-                // bullet disappears at wall/outside
-                if (!arena.isInside(next) || arena.isWall(next)) break;
+                if (!arena.isInside(next) || arena.isWall(next))
+                    break;
 
                 if (next.x == cell.x && next.y == cell.y) {
-                    // sooner hit => bigger danger
                     danger += (horizon - t + 1);
                     break;
                 }

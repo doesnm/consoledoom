@@ -21,15 +21,14 @@ public class Game {
                 .setPreferTerminalEmulator(true)
                 .setForceAWTOverSwing(true);
 
-// Bigger font
-        java.awt.Font font = new java.awt.Font("Consolas", java.awt.Font.PLAIN, 26);
+        // Bigger font
+        java.awt.Font font = new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 26);
         factory.setTerminalEmulatorFontConfiguration(
-                com.googlecode.lanterna.terminal.swing.AWTTerminalFontConfiguration.newInstance(font)
-        );
+                com.googlecode.lanterna.terminal.swing.AWTTerminalFontConfiguration.newInstance(font));
 
         com.googlecode.lanterna.terminal.Terminal terminal = factory.createTerminalEmulator();
 
-// ✅ maximize the window if it is SwingTerminalFrame
+        // ✅ maximize the window if it is SwingTerminalFrame
         if (terminal instanceof com.googlecode.lanterna.terminal.swing.SwingTerminalFrame frame) {
             frame.setTitle("Console Doom");
             frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
@@ -40,7 +39,6 @@ public class Game {
         screen.startScreen();
         screen.setCursorPosition(null);
         screen.doResizeIfNecessary();
-
 
         gameScreen = new GameScreen();
         long lastSecondMark = System.currentTimeMillis();

@@ -1,6 +1,5 @@
 package com.consoledoom.systems;
 
-import com.consoledoom.arena.Arena;
 import com.consoledoom.entities.Bullet;
 import com.consoledoom.entities.monsters.Monster;
 import com.consoledoom.utils.Vec2;

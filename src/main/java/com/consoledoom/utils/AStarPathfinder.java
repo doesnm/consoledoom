@@ -86,6 +86,17 @@ public class AStarPathfinder {
         return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     }
 
+    public int findPathLength(Vec2 start, Vec2 goal) {
+        if (start.equals(goal))
+            return 0;
+
+        Node result = aStar(start, goal);
+        if (result == null)
+            return -1;
+
+        return (int) result.gScore;
+    }
+
     private boolean isWalkable(Vec2 pos, Vec2 from) {
         if (!arena.isInside(pos))
             return false;

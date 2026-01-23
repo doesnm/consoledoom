@@ -87,7 +87,6 @@ public class Renderer {
         screen.refresh();
     }
 
-    // ← Вспомогательный метод для установки символа с цветом
     private static void putChar(TextGraphics g, int x, int y, char symbol, TextColor fg) {
         g.setForegroundColor(fg);
         g.setBackgroundColor(BG_COLOR);
