@@ -26,7 +26,7 @@ public class WeaponSystem {
 
         Vec2 dir = player.getFacing();
         if (dir == null || (dir.x == 0 && dir.y == 0)) {
-            dir = new Vec2(1, 0); // default right
+            dir = new Vec2(1, 0);
         }
 
         Vec2 spawn = new Vec2(

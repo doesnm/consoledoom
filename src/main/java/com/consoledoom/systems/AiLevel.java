@@ -6,9 +6,9 @@ public enum AiLevel {
     SMART(4, 8, 6),
     GODLIKE(6, 12, 0);
 
-    public final int horizonTicks;      // how far ahead we predict bullets
-    public final int dangerWeight;      // how strongly we avoid danger
-    public final int randomnessPercent; // adds noise so it’s not perfect
+    public final int horizonTicks;
+    public final int dangerWeight;
+    public final int randomnessPercent;
 
     AiLevel(int horizonTicks, int dangerWeight, int randomnessPercent) {
         this.horizonTicks = horizonTicks;

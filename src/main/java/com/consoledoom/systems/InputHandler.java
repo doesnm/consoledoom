@@ -12,7 +12,7 @@ public class InputHandler {
 
     public static class InputResult {
         public final Action action;
-        public final int dx, dy; // for MOVE
+        public final int dx, dy;
 
         private InputResult(Action action, int dx, int dy) {
             this.action = action;
@@ -38,7 +38,8 @@ public class InputHandler {
     }
 
     public static InputResult handleKey(KeyStroke key, Player player) {
-        if (key == null) return InputResult.none();
+        if (key == null)
+            return InputResult.none();
 
         // quit
         if (key.getKeyType() == KeyType.Escape
@@ -46,7 +47,6 @@ public class InputHandler {
             return InputResult.quit();
         }
 
-        // ---- NEW: arrow keys = shoot in direction ----
         if (key.getKeyType() == KeyType.ArrowUp) {
             player.setFacing(new com.consoledoom.utils.Vec2(0, -1));
             return InputResult.shoot();
@@ -64,12 +64,11 @@ public class InputHandler {
             return InputResult.shoot();
         }
 
-        // non-character keys (except arrows handled above)
-        if (key.getKeyType() != KeyType.Character) return InputResult.none();
+        if (key.getKeyType() != KeyType.Character)
+            return InputResult.none();
 
         char c = Character.toLowerCase(key.getCharacter());
 
-        // movement on WASD
         switch (c) {
             case 'w' -> {
                 player.setFacing(new com.consoledoom.utils.Vec2(0, -1));
@@ -86,11 +85,6 @@ public class InputHandler {
             case 'd' -> {
                 player.setFacing(new com.consoledoom.utils.Vec2(1, 0));
                 return InputResult.move(1, 0);
-            }
-
-            // OPTIONAL: keep space as shoot forward (remove if you want ONLY arrows)
-            case ' ' -> {
-                return InputResult.shoot();
             }
 
             default -> {

@@ -34,7 +34,7 @@ public class AStarPathfinder {
         List<Vec2> path = reconstructPath(result);
         if (path.size() < 2)
             return null;
-        return path.get(1); // [0] = start, [1] = next step
+        return path.get(1);
     }
 
     private Node aStar(Vec2 start, Vec2 goal) {

@@ -28,7 +28,6 @@ public class Game {
 
         com.googlecode.lanterna.terminal.Terminal terminal = factory.createTerminalEmulator();
 
-        // ✅ maximize the window if it is SwingTerminalFrame
         if (terminal instanceof com.googlecode.lanterna.terminal.swing.SwingTerminalFrame frame) {
             frame.setTitle("Console Doom");
             frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
@@ -59,13 +58,11 @@ public class Game {
                 KeyStroke key;
                 while ((key = screen.pollInput()) != null) {
 
-                    // ✅ ESC = quit immediately (no leaderboard)
                     if (key.getKeyType() == com.googlecode.lanterna.input.KeyType.Escape) {
                         running = false;
                         break;
                     }
 
-                    // existing state handling below...
                     if (state == GameState.PLAYING) {
                         if (isQuitKey(key)) {
                             state = GameState.GAME_OVER_NAME;
@@ -112,7 +109,6 @@ public class Game {
                     leaderboardScreen.render(screen);
                 }
 
-                // FPS cap
                 long elapsed = System.currentTimeMillis() - frameStart;
                 if (elapsed < FRAME_MS)
                     Thread.sleep(FRAME_MS - elapsed);

@@ -58,7 +58,7 @@ public class MonsterAISystem {
 
                 int pathDist = pathfinder.findPathLength(cand, playerPos);
                 if (pathDist < 0)
-                    pathDist = 1000; // нет пути - большой штраф
+                    pathDist = 1000;
 
                 int score = -pathDist * 10 - danger * level.dangerWeight;
 

@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/db/Database.java
 package com.consoledoom.db;
 
 import java.sql.Connection;
@@ -14,7 +13,7 @@ public class Database {
         Connection c = DriverManager.getConnection(URL, USER, PASS);
 
         try (var st = c.createStatement();
-             var rs = st.executeQuery("select current_database(), inet_server_addr(), inet_server_port()")) {
+                var rs = st.executeQuery("select current_database(), inet_server_addr(), inet_server_port()")) {
             if (rs.next()) {
                 System.out.println("DB OK: " + rs.getString(1) + " " + rs.getString(2) + ":" + rs.getInt(3));
             }

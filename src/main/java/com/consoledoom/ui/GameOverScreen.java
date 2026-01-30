@@ -50,7 +50,6 @@ public class GameOverScreen {
                 finalNickname = nick;
             } catch (SQLException e) {
                 e.printStackTrace();
-                // Можно показать ошибку в UI
             }
             finalNickname = nick;
             saved = true;

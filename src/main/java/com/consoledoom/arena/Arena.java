@@ -43,7 +43,6 @@ public class Arena {
             int y = 0;
 
             while ((line = br.readLine()) != null) {
-                // IMPORTANT: don't trim the line (spaces matter)
                 for (int x = 0; x < line.length(); x++) {
                     char c = line.charAt(x);
                     Vec2 pos = new Vec2(x, y);

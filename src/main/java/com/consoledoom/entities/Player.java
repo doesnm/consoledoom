@@ -9,7 +9,7 @@ public class Player extends Entity {
     private int kills;
     private int score;
 
-    private Vec2 facing = new Vec2(1, 0); // default: right
+    private Vec2 facing = new Vec2(1, 0);
 
     public Player(Vec2 position) {
         super(position, '@', TextColor.ANSI.WHITE_BRIGHT);
