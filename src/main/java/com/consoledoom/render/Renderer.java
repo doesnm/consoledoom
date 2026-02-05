@@ -1,6 +1,6 @@
 package com.consoledoom.render;
 
-import com.consoledoom.core.Config;
+import com.consoledoom.config.GameConfig;
 import com.consoledoom.entities.Bullet;
 import com.consoledoom.entities.Player;
 import com.consoledoom.entities.Wall;
@@ -30,10 +30,10 @@ public class Renderer {
 
         // empty space
         g.setForegroundColor(TextColor.ANSI.DEFAULT);
-        for (int y = 0; y < Config.ARENA_HEIGHT; y++) {
-            for (int x = 0; x < Config.ARENA_WIDTH; x++) {
+        for (int y = 0; y < GameConfig.INSTANCE.getArenaHeight(); y++) {
+            for (int x = 0; x < GameConfig.INSTANCE.getArenaWidth(); x++) {
                 g.setCharacter(x, offsetY + y, TextCharacter.fromCharacter(
-                        Config.EMPTY_SYMBOL,
+                        GameConfig.INSTANCE.getEmptySymbol(),
                         TextColor.ANSI.DEFAULT,
                         BG_COLOR)[0]);
             }
@@ -81,7 +81,7 @@ public class Renderer {
         g.putString(0, 0, hud);
 
         g.setForegroundColor(TextColor.ANSI.CYAN);
-        g.putString(0, offsetY + Config.ARENA_HEIGHT + 1,
+        g.putString(0, offsetY + GameConfig.INSTANCE.getArenaHeight() + 1,
                 "Controls: WASD move | Arrow keys shoot | Q quit");
 
         screen.refresh();
@@ -94,12 +94,12 @@ public class Renderer {
     }
 
     private static boolean inBounds(int x, int y) {
-        return x >= 0 && x < Config.ARENA_WIDTH && y >= 0 && y < Config.ARENA_HEIGHT;
+        return x >= 0 && x < GameConfig.INSTANCE.getArenaWidth() && y >= 0 && y < GameConfig.INSTANCE.getArenaHeight();
     }
 
     private static String renderHealth(int health) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < Config.MAX_HEALTH; i++)
+        for (int i = 0; i < GameConfig.INSTANCE.getMaxHealth(); i++)
             sb.append(i < health ? "♥" : "♡");
         return sb.toString();
     }

@@ -1,16 +1,25 @@
+// src/main/java/com/consoledoom/ui/GameOverScreen.java
 package com.consoledoom.ui;
 
-import com.consoledoom.db.*;
+import com.consoledoom.db.GameSessionDAO;
+import com.consoledoom.security.SecurityContext;
+import com.consoledoom.validation.GameDataValidator;
+import com.consoledoom.validation.ValidationResult;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
+
 import java.sql.SQLException;
 
+/**
+ * Game over screen - saves to currently authenticated user.
+ */
 public class GameOverScreen {
-    private final StringBuilder nameBuffer = new StringBuilder();
     private final int score, kills, wave, timeSeconds;
     private boolean saved = false;
-    private String finalNickname = null;
+    private String statusMessage = "";
 
     public GameOverScreen(int score, int kills, int wave, int timeSeconds) {
         this.score = score;
@@ -20,61 +29,69 @@ public class GameOverScreen {
     }
 
     public void handleInput(KeyStroke key) {
-        if (key.getKeyType() == KeyType.Character) {
-            char ch = key.getCharacter();
-            if ((Character.isLetterOrDigit(ch) || ch == '_' || ch == '-') && nameBuffer.length() < 16) {
-                nameBuffer.append(ch);
-            }
-        } else if (key.getKeyType() == KeyType.Backspace && nameBuffer.length() > 0) {
-            nameBuffer.deleteCharAt(nameBuffer.length() - 1);
-        } else if (key.getKeyType() == KeyType.Enter) {
-            saveIfNeeded();
-        } else if (key.getKeyType() == KeyType.Escape) {
+        if (key.getKeyType() == KeyType.Enter || key.getKeyType() == KeyType.Escape) {
             saveIfNeeded();
         }
     }
 
     private void saveIfNeeded() {
-        if (!saved) {
-            String nick = nameBuffer.toString().trim();
-            if (nick.isEmpty())
-                nick = "Player";
-            try {
-                PlayerDAO playerDao = new PlayerDAO();
-                GameSessionDAO sessionDao = new GameSessionDAO();
+        if (saved)
+            return;
 
-                int playerId = playerDao.upsertPlayer(nick);
-                sessionDao.saveSession(playerId, score, kills, 1, wave, timeSeconds);
+        // Validate game data using lambda validators
+        ValidationResult validation = GameDataValidator.validateGameSession(
+                score, kills, wave, timeSeconds);
 
-                saved = true;
-                finalNickname = nick;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            finalNickname = nick;
+        if (!validation.isValid()) {
+            statusMessage = "Invalid game data: " + validation.getFirstError();
             saved = true;
+            return;
         }
+
+        SecurityContext.getInstance().getCurrentUser().ifPresentOrElse(
+                user -> {
+                    try {
+                        GameSessionDAO dao = new GameSessionDAO();
+                        dao.saveSession(user.getId(), score, kills, 1, wave, timeSeconds);
+                        statusMessage = "Score saved!";
+                    } catch (SQLException e) {
+                        statusMessage = "Failed to save: " + e.getMessage();
+                    }
+                },
+                () -> statusMessage = "Not logged in - score not saved");
+
+        saved = true;
     }
 
     public void render(Screen screen) throws Exception {
         screen.clear();
-        var g = screen.newTextGraphics();
-        g.putString(2, 2, "=== GAME OVER ===");
-        g.putString(2, 4, "Final score: " + score);
-        g.putString(2, 5, "Kills: " + kills);
-        g.putString(2, 6, "Wave: " + wave);
-        g.putString(2, 7, String.format("Time: %02d:%02d", timeSeconds / 60, timeSeconds % 60));
-        g.putString(2, 9, "Enter nickname (ENTER to save):");
-        g.putString(2, 10, "> " + nameBuffer);
-        g.putString(2, 12, "Backspace=delete | ESC=skip save");
+        TextGraphics g = screen.newTextGraphics();
+
+        g.setForegroundColor(TextColor.ANSI.RED);
+        g.putString(25, 3, "=== GAME OVER ===");
+
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+
+        SecurityContext.getInstance().getCurrentUser()
+                .ifPresent(user -> g.putString(2, 5, "Player: " + user.getNickname()));
+
+        g.putString(2, 7, "Final Score: " + score);
+        g.putString(2, 8, "Kills: " + kills);
+        g.putString(2, 9, "Wave: " + wave);
+        g.putString(2, 10, String.format("Time: %02d:%02d", timeSeconds / 60, timeSeconds % 60));
+
+        if (!statusMessage.isEmpty()) {
+            g.setForegroundColor(TextColor.ANSI.GREEN);
+            g.putString(2, 13, statusMessage);
+        }
+
+        g.setForegroundColor(TextColor.ANSI.CYAN);
+        g.putString(2, 16, "Press ENTER to continue to leaderboard...");
+
         screen.refresh();
     }
 
     public boolean isDone() {
         return saved;
-    }
-
-    public String getNickname() {
-        return finalNickname;
     }
 }

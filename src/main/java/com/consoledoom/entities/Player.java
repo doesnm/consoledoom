@@ -1,6 +1,6 @@
 package com.consoledoom.entities;
 
-import com.consoledoom.core.Config;
+import com.consoledoom.config.GameConfig;
 import com.consoledoom.utils.Vec2;
 import com.googlecode.lanterna.TextColor;
 
@@ -13,7 +13,7 @@ public class Player extends Entity {
 
     public Player(Vec2 position) {
         super(position, '@', TextColor.ANSI.WHITE_BRIGHT);
-        this.health = Config.MAX_HEALTH;
+        this.health = GameConfig.INSTANCE.getMaxHealth();
     }
 
     public int getHealth() {

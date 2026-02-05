@@ -1,6 +1,6 @@
 package com.consoledoom.arena;
 
-import com.consoledoom.core.Config;
+import com.consoledoom.config.GameConfig;
 import com.consoledoom.entities.Wall;
 import com.consoledoom.utils.Vec2;
 
@@ -15,7 +15,7 @@ public class Arena {
     private final List<Wall> walls = new ArrayList<>();
     private Vec2 playerSpawn = new Vec2(5, 8);
 
-    private final String[] maps = {"/maps/map1.txt", "/maps/map2.txt"};
+    private final String[] maps = { "/maps/map1.txt", "/maps/map2.txt" };
     private int mapIndex = 0;
 
     public Arena() {
@@ -36,7 +36,8 @@ public class Arena {
         playerSpawn = new Vec2(5, 8);
 
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
-            if (is == null) throw new RuntimeException("Map not found: " + resourcePath);
+            if (is == null)
+                throw new RuntimeException("Map not found: " + resourcePath);
 
             BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             String line;
@@ -47,8 +48,10 @@ public class Arena {
                     char c = line.charAt(x);
                     Vec2 pos = new Vec2(x, y);
 
-                    if (c == '#') walls.add(new Wall(pos));
-                    else if (c == '@') playerSpawn = pos;
+                    if (c == '#')
+                        walls.add(new Wall(pos));
+                    else if (c == '@')
+                        playerSpawn = pos;
                 }
                 y++;
             }
@@ -62,13 +65,14 @@ public class Arena {
     }
 
     public boolean isInside(Vec2 p) {
-        return p.x >= 0 && p.x < Config.ARENA_WIDTH
-                && p.y >= 0 && p.y < Config.ARENA_HEIGHT;
+        return p.x >= 0 && p.x < GameConfig.INSTANCE.getArenaWidth()
+                && p.y >= 0 && p.y < GameConfig.INSTANCE.getArenaHeight();
     }
 
     public boolean isWall(Vec2 p) {
         for (Wall w : walls) {
-            if (w.getPosition().equals(p)) return true;
+            if (w.getPosition().equals(p))
+                return true;
         }
         return false;
     }

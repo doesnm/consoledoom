@@ -1,7 +1,7 @@
 package com.consoledoom.ui;
 
 import com.consoledoom.arena.Arena;
-import com.consoledoom.core.Config;
+import com.consoledoom.config.GameConfig;
 import com.consoledoom.entities.Bullet;
 import com.consoledoom.entities.Player;
 import com.consoledoom.entities.monsters.Monster;
@@ -45,11 +45,8 @@ public class GameScreen {
         if (monsterMoveCooldown > 0) {
             monsterMoveCooldown--;
         } else {
-            AiLevel level =
-                    wave < 1 ? AiLevel.DUMB :
-                            wave < 2 ? AiLevel.NORMAL :
-                                    wave < 3 ? AiLevel.SMART :
-                                            AiLevel.GODLIKE;
+            AiLevel level = wave < 1 ? AiLevel.DUMB
+                    : wave < 2 ? AiLevel.NORMAL : wave < 3 ? AiLevel.SMART : AiLevel.GODLIKE;
 
             MonsterAISystem.moveMonstersSmart(monsters, player.getPosition(), arena, bullets, level);
             monsterMoveCooldown = MONSTER_MOVE_DELAY;
@@ -112,14 +109,12 @@ public class GameScreen {
         }
     }
 
-
-
     private Vec2 findSpawnPosition() {
         int tries = 0;
         final int MIN_SPAWN_DISTANCE = 7;
         while (tries < 1000) {
-            int x = rng.nextInt(Config.ARENA_WIDTH);
-            int y = rng.nextInt(Config.ARENA_HEIGHT);
+            int x = rng.nextInt(GameConfig.INSTANCE.getArenaHeight());
+            int y = rng.nextInt(GameConfig.INSTANCE.getArenaWidth());
             Vec2 pos = new Vec2(x, y);
             if (!arena.isWalkable(pos))
                 continue;

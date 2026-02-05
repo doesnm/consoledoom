@@ -1,9 +1,11 @@
+// src/main/java/com/consoledoom/models/LeaderboardEntry.java
 package com.consoledoom.models;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class LeaderboardEntry {
+    private final int sessionId;
     private final String nickname;
     private final int score;
     private final int kills;
@@ -13,14 +15,10 @@ public class LeaderboardEntry {
     private final int timeSurvivedSec;
     private final Timestamp playedAt;
 
-    public LeaderboardEntry(String nickname,
-            int score,
-            int kills,
-            int deaths,
-            BigDecimal kd,
-            int wave,
-            int timeSurvivedSec,
-            Timestamp playedAt) {
+    public LeaderboardEntry(int sessionId, String nickname, int score, int kills,
+            int deaths, BigDecimal kd, int wave,
+            int timeSurvivedSec, Timestamp playedAt) {
+        this.sessionId = sessionId;
         this.nickname = nickname;
         this.score = score;
         this.kills = kills;
@@ -29,6 +27,11 @@ public class LeaderboardEntry {
         this.wave = wave;
         this.timeSurvivedSec = timeSurvivedSec;
         this.playedAt = playedAt;
+    }
+
+    // Getters
+    public int getSessionId() {
+        return sessionId;
     }
 
     public String getNickname() {

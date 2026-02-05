@@ -1,30 +1,21 @@
+// src/main/java/com/consoledoom/db/Database.java
 package com.consoledoom.db;
 
+import com.consoledoom.config.GameConfig;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Singleton Database
+ * Database connection factory using Singleton config.
  */
-public final class Database {
+public class Database {
+    private static final GameConfig config = GameConfig.INSTANCE;
 
-    private static Database instance;
-
-    private final String url = DbConfig.url();
-    private final String user = DbConfig.user();
-    private final String pass = DbConfig.pass();
-
-    private Database() {}
-
-    public static Database getInstance() {
-        if (instance == null) {
-            instance = new Database();
-        }
-        return instance;
-    }
-
-    public Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(
+                config.getDbUrl(),
+                config.getDbUser(),
+                config.getDbPassword());
     }
 }
