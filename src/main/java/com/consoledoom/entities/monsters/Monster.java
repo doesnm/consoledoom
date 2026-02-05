@@ -32,3 +32,4 @@ public abstract class Monster extends Entity {
         return moveDelay;
     }
 }
+

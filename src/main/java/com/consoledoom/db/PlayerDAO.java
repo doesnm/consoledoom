@@ -14,7 +14,7 @@ public class PlayerDAO {
                 RETURNING player_id;
                 """;
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = Database.getInstance().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nickname);
             try (ResultSet rs = ps.executeQuery()) {
@@ -28,7 +28,7 @@ public class PlayerDAO {
 
     public Player findByNickname(String nickname) throws SQLException {
         String sql = "SELECT player_id, nickname FROM players WHERE nickname = ?";
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = Database.getInstance().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nickname);
             try (ResultSet rs = ps.executeQuery()) {

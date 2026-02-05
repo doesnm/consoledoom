@@ -10,10 +10,10 @@ import com.consoledoom.systems.*;
 import com.consoledoom.utils.Vec2;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
-import com.consoledoom.systems.MonsterAISystem;
-import com.consoledoom.systems.AiLevel;
+
 import java.util.List;
 import java.util.Random;
+import com.consoledoom.entities.monsters.MonsterFactory;
 
 public class GameScreen {
     private final Arena arena;
@@ -107,20 +107,12 @@ public class GameScreen {
             Vec2 pos = findSpawnPosition();
             if (pos == null)
                 break;
-            Monster monster = createMonster(pos);
+            Monster monster = MonsterFactory.createForWave(wave, rng, pos);
             monsters.add(monster);
         }
     }
 
-    private Monster createMonster(Vec2 pos) {
-        if (wave >= 5 && rng.nextDouble() < 0.2) {
-            return new com.consoledoom.entities.monsters.TankMonster(pos);
-        } else if (wave >= 3 && rng.nextDouble() < 0.4) {
-            return new com.consoledoom.entities.monsters.FastMonster(pos);
-        } else {
-            return new com.consoledoom.entities.monsters.BasicMonster(pos);
-        }
-    }
+
 
     private Vec2 findSpawnPosition() {
         int tries = 0;

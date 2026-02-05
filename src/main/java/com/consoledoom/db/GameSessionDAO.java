@@ -15,7 +15,7 @@ public class GameSessionDAO {
                 VALUES (?, ?, ?, ?, ?, ?, calc_kd(?, ?));
                 """;
 
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = Database.getInstance().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, playerId);
             ps.setInt(2, score);
@@ -47,7 +47,7 @@ public class GameSessionDAO {
                 """;
 
         List<LeaderboardEntry> entries = new ArrayList<>();
-        try (Connection conn = Database.getConnection();
+        try (Connection conn = Database.getInstance().getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, limit);
@@ -66,6 +66,6 @@ public class GameSessionDAO {
                 }
             }
         }
-        return entries; // ← Возвращает List<LeaderboardEntry>
+        return entries; 
     }
 }
