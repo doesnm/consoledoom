@@ -1,12 +1,8 @@
-// src/main/java/com/consoledoom/security/SecurityContext.java
 package com.consoledoom.security;
 
 import com.consoledoom.models.User;
 import java.util.Optional;
 
-/**
- * Singleton for managing current user session and authorization.
- */
 public class SecurityContext {
     private static SecurityContext instance;
     private User currentUser;

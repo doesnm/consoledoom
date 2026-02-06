@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/models/LeaderboardEntry.java
 package com.consoledoom.models;
 
 import java.math.BigDecimal;
@@ -29,7 +28,6 @@ public class LeaderboardEntry {
         this.playedAt = playedAt;
     }
 
-    // Getters
     public int getSessionId() {
         return sessionId;
     }

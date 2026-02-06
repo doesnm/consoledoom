@@ -1,9 +1,7 @@
-// src/main/java/com/consoledoom/ui/AdminScreen.java
 package com.consoledoom.ui;
 
 import com.consoledoom.models.LeaderboardEntry;
 import com.consoledoom.models.User;
-import com.consoledoom.security.Role;
 import com.consoledoom.security.SecurityContext;
 import com.consoledoom.service.AdminService;
 import com.consoledoom.service.AdminService.OperationResult;
@@ -15,9 +13,6 @@ import com.googlecode.lanterna.screen.Screen;
 
 import java.util.List;
 
-/**
- * Admin panel for managing users and game records.
- */
 public class AdminScreen {
     private final AdminService adminService;
 
@@ -58,7 +53,6 @@ public class AdminScreen {
         if (key.getKeyType() == KeyType.Escape) {
             shouldExit = true;
         } else if (key.getKeyType() == KeyType.Tab) {
-            // Switch tabs
             currentTab = (currentTab == Tab.USERS) ? Tab.RECORDS : Tab.USERS;
             selectedIndex = 0;
             scrollOffset = 0;
@@ -114,35 +108,29 @@ public class AdminScreen {
         screen.clear();
         TextGraphics g = screen.newTextGraphics();
 
-        // Title
         g.setForegroundColor(TextColor.ANSI.RED);
         g.putString(25, 1, "=== ADMIN PANEL ===");
 
-        // Current user info
         SecurityContext.getInstance().getCurrentUser().ifPresent(user -> {
             g.setForegroundColor(TextColor.ANSI.WHITE);
             g.putString(2, 1, "Logged in as: " + user.getNickname() +
                     " [" + user.getRole() + "]");
         });
 
-        // Tabs
         g.setForegroundColor(currentTab == Tab.USERS ? TextColor.ANSI.YELLOW : TextColor.ANSI.WHITE);
         g.putString(2, 3, "[USERS]");
         g.setForegroundColor(currentTab == Tab.RECORDS ? TextColor.ANSI.YELLOW : TextColor.ANSI.WHITE);
         g.putString(12, 3, "[RECORDS]");
 
-        // Controls
         g.setForegroundColor(TextColor.ANSI.CYAN);
         g.putString(30, 3, "Tab:Switch | ↑↓:Select | D:Delete | R:Refresh | ESC:Back");
 
-        // Content
         if (currentTab == Tab.USERS) {
             renderUsers(g);
         } else {
             renderRecords(g);
         }
 
-        // Status message
         if (!statusMessage.isEmpty()) {
             g.setForegroundColor(isError ? TextColor.ANSI.RED : TextColor.ANSI.GREEN);
             g.putString(2, 20, statusMessage);
@@ -180,7 +168,6 @@ public class AdminScreen {
                     user.isActive() ? "Yes" : "No"));
         }
 
-        // Reset colors
         g.setForegroundColor(TextColor.ANSI.WHITE);
         g.setBackgroundColor(TextColor.ANSI.BLACK);
 
@@ -222,7 +209,6 @@ public class AdminScreen {
                     date));
         }
 
-        // Reset colors
         g.setForegroundColor(TextColor.ANSI.WHITE);
         g.setBackgroundColor(TextColor.ANSI.BLACK);
 

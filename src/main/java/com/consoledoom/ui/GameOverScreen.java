@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/ui/GameOverScreen.java
 package com.consoledoom.ui;
 
 import com.consoledoom.db.GameSessionDAO;
@@ -13,9 +12,6 @@ import com.googlecode.lanterna.screen.Screen;
 
 import java.sql.SQLException;
 
-/**
- * Game over screen - saves to currently authenticated user.
- */
 public class GameOverScreen {
     private final int score, kills, wave, timeSeconds;
     private boolean saved = false;
@@ -38,7 +34,6 @@ public class GameOverScreen {
         if (saved)
             return;
 
-        // Validate game data using lambda validators
         ValidationResult validation = GameDataValidator.validateGameSession(
                 score, kills, wave, timeSeconds);
 

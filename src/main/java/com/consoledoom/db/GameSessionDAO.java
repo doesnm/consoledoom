@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/db/GameSessionDAO.java
 package com.consoledoom.db;
 
 import com.consoledoom.models.LeaderboardEntry;
@@ -12,17 +11,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO for game session operations with validation and security.
- */
 public class GameSessionDAO {
 
-    /**
-     * Saves a game session with validation.
-     */
     public void saveSession(int userId, int score, int kills, int deaths,
             int wave, int timeSurvivedSec) throws SQLException {
-        // Validate data using lambda validators
         ValidationResult validation = GameDataValidator.validateGameSession(
                 score, kills, wave, timeSurvivedSec);
 
@@ -49,9 +41,6 @@ public class GameSessionDAO {
         }
     }
 
-    /**
-     * Gets leaderboard - public endpoint.
-     */
     public List<LeaderboardEntry> getLeaderboard(int limit) throws SQLException {
         String sql = """
                     SELECT u.nickname, s.score, s.kills, s.deaths, s.kd,
@@ -85,9 +74,6 @@ public class GameSessionDAO {
         return entries;
     }
 
-    /**
-     * Deletes a game record - requires MANAGER permission.
-     */
     @SecuredEndpoint(requiredPermissions = { Permission.DELETE_GAME_RECORDS }, minimumRole = Role.MANAGER)
     public boolean deleteGameRecord(int sessionId) throws SQLException {
         String sql = "DELETE FROM game_sessions WHERE session_id = ?";
@@ -99,9 +85,6 @@ public class GameSessionDAO {
         }
     }
 
-    /**
-     * Gets all game records for a user.
-     */
     public List<LeaderboardEntry> getUserRecords(int userId) throws SQLException {
         String sql = """
                     SELECT u.nickname, s.score, s.kills, s.deaths, s.kd,

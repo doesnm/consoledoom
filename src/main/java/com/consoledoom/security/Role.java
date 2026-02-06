@@ -1,12 +1,8 @@
-// src/main/java/com/consoledoom/security/Role.java
 package com.consoledoom.security;
 
 import java.util.Set;
 import java.util.EnumSet;
 
-/**
- * User roles with hierarchical permissions.
- */
 public enum Role {
     PLAYER(1),
     EDITOR(2),

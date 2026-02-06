@@ -1,12 +1,8 @@
-// src/main/java/com/consoledoom/models/User.java
 package com.consoledoom.models;
 
 import com.consoledoom.security.Role;
 import java.sql.Timestamp;
 
-/**
- * User entity with authentication and authorization data.
- */
 public class User {
     private final int id;
     private final String nickname;
@@ -27,7 +23,6 @@ public class User {
         this.active = active;
     }
 
-    // Builder pattern for User
     public static Builder builder() {
         return new Builder();
     }
@@ -81,7 +76,6 @@ public class User {
         }
     }
 
-    // Getters
     public int getId() {
         return id;
     }

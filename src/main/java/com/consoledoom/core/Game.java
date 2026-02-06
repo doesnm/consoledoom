@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/core/Game.java
 package com.consoledoom.core;
 
 import com.consoledoom.config.GameConfig;
@@ -18,10 +17,6 @@ import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import java.awt.Font;
 import java.awt.Frame;
 
-/**
- * Main game controller with state management.
- * Uses State pattern for game flow.
- */
 public class Game {
     private boolean running = true;
     private GameState state = GameState.AUTH;
@@ -68,7 +63,6 @@ public class Game {
                 long frameStart = System.currentTimeMillis();
                 screen.doResizeIfNecessary();
 
-                // Time update for game
                 if (state == GameState.PLAYING) {
                     if (System.currentTimeMillis() - lastSecondMark >= 1000) {
                         gameScreen.incrementTime();
@@ -76,7 +70,6 @@ public class Game {
                     }
                 }
 
-                // Input handling
                 KeyStroke key;
                 while ((key = screen.pollInput()) != null) {
                     if (key.getKeyType() == KeyType.Escape && state == GameState.AUTH) {
@@ -86,13 +79,10 @@ public class Game {
                     handleInput(key);
                 }
 
-                // Update
                 update();
 
-                // Render
                 render(screen);
 
-                // Frame timing
                 long elapsed = System.currentTimeMillis() - frameStart;
                 if (elapsed < frameMs) {
                     Thread.sleep(frameMs - elapsed);

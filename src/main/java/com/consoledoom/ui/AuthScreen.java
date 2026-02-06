@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/ui/AuthScreen.java
 package com.consoledoom.ui;
 
 import com.consoledoom.service.AuthService;
@@ -9,9 +8,6 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 
-/**
- * Authentication screen for login/registration.
- */
 public class AuthScreen {
     private final AuthService authService;
     private final StringBuilder nicknameBuffer = new StringBuilder();
@@ -37,12 +33,10 @@ public class AuthScreen {
 
     public void handleInput(KeyStroke key) {
         if (key.getKeyType() == KeyType.Tab) {
-            // Switch between fields
             activeField = (activeField == InputField.NICKNAME)
                     ? InputField.PASSWORD
                     : InputField.NICKNAME;
         } else if (key.getKeyType() == KeyType.F1) {
-            // Switch mode
             mode = (mode == AuthMode.LOGIN) ? AuthMode.REGISTER : AuthMode.LOGIN;
             statusMessage = "";
         } else if (key.getKeyType() == KeyType.Enter) {
@@ -85,18 +79,15 @@ public class AuthScreen {
         screen.clear();
         TextGraphics g = screen.newTextGraphics();
 
-        // Title
         g.setForegroundColor(TextColor.ANSI.CYAN);
         String title = (mode == AuthMode.LOGIN) ? "=== LOGIN ===" : "=== REGISTER ===";
         g.putString(25, 2, title);
 
-        // Instructions
         g.setForegroundColor(TextColor.ANSI.WHITE);
         g.putString(2, 4, "F1: Switch to " +
                 (mode == AuthMode.LOGIN ? "Register" : "Login"));
         g.putString(2, 5, "Tab: Switch field | Enter: Submit | ESC: Quit");
 
-        // Nickname field
         g.setForegroundColor(activeField == InputField.NICKNAME
                 ? TextColor.ANSI.YELLOW
                 : TextColor.ANSI.WHITE);
@@ -104,7 +95,6 @@ public class AuthScreen {
         g.putString(12, 8, nicknameBuffer.toString() +
                 (activeField == InputField.NICKNAME ? "_" : ""));
 
-        // Password field (masked)
         g.setForegroundColor(activeField == InputField.PASSWORD
                 ? TextColor.ANSI.YELLOW
                 : TextColor.ANSI.WHITE);
@@ -113,13 +103,11 @@ public class AuthScreen {
         g.putString(12, 10, maskedPassword +
                 (activeField == InputField.PASSWORD ? "_" : ""));
 
-        // Status message
         if (!statusMessage.isEmpty()) {
             g.setForegroundColor(isError ? TextColor.ANSI.RED : TextColor.ANSI.GREEN);
             g.putString(2, 13, statusMessage);
         }
 
-        // Validation hints
         g.setForegroundColor(TextColor.ANSI.BLACK_BRIGHT);
         g.putString(2, 16, "Nickname: 3-16 chars, letters/numbers/_/-");
         g.putString(2, 17, "Password: 4-32 chars");

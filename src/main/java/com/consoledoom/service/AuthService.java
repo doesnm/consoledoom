@@ -13,10 +13,6 @@ import java.sql.SQLException;
 import java.util.HexFormat;
 import java.util.Optional;
 
-/**
- * Service for authentication operations.
- * Follows Single Responsibility Principle.
- */
 public class AuthService {
     private final UserDAO userDAO;
     private final SecurityContext securityContext;
@@ -26,11 +22,7 @@ public class AuthService {
         this.securityContext = SecurityContext.getInstance();
     }
 
-    /**
-     * Registers a new user with validation.
-     */
     public AuthResult register(String nickname, String password) {
-        // Validate using lambda validators
         ValidationResult nicknameValidation = UserValidator.nicknameValidator().validate(nickname);
         if (!nicknameValidation.isValid()) {
             return AuthResult.failure(nicknameValidation.getFirstError());
@@ -49,7 +41,6 @@ public class AuthService {
             String passwordHash = hashPassword(password);
             int userId = userDAO.registerUser(nickname, passwordHash);
 
-            // Auto-login after registration
             Optional<User> user = userDAO.authenticate(nickname, passwordHash);
             user.ifPresent(securityContext::setCurrentUser);
 
@@ -59,9 +50,6 @@ public class AuthService {
         }
     }
 
-    /**
-     * Authenticates a user.
-     */
     public AuthResult login(String nickname, String password) {
         if (nickname == null || nickname.isEmpty() || password == null || password.isEmpty()) {
             return AuthResult.failure("Nickname and password are required");
@@ -82,30 +70,18 @@ public class AuthService {
         }
     }
 
-    /**
-     * Logs out current user.
-     */
     public void logout() {
         securityContext.logout();
     }
 
-    /**
-     * Gets currently logged in user.
-     */
     public Optional<User> getCurrentUser() {
         return securityContext.getCurrentUser();
     }
 
-    /**
-     * Checks if user is authenticated.
-     */
     public boolean isAuthenticated() {
         return securityContext.isAuthenticated();
     }
 
-    /**
-     * Hashes password using SHA-256.
-     */
     private String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -116,9 +92,6 @@ public class AuthService {
         }
     }
 
-    /**
-     * Result of authentication operations.
-     */
     public static class AuthResult {
         private final boolean success;
         private final String message;

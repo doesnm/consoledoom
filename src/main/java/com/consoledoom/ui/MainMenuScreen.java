@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/ui/MainMenuScreen.java
 package com.consoledoom.ui;
 
 import com.consoledoom.security.Permission;
@@ -12,9 +11,6 @@ import com.googlecode.lanterna.screen.Screen;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Main menu with role-based options.
- */
 public class MainMenuScreen {
 
     public enum MenuAction {
@@ -34,7 +30,6 @@ public class MainMenuScreen {
         menuItems.add(new MenuItem("Play Game", MenuAction.PLAY));
         menuItems.add(new MenuItem("Leaderboard", MenuAction.LEADERBOARD));
 
-        // Admin option only for admins/managers
         if (SecurityContext.getInstance().hasPermission(Permission.VIEW_ADMIN_PANEL)) {
             menuItems.add(new MenuItem("Admin Panel", MenuAction.ADMIN));
         }
@@ -57,7 +52,6 @@ public class MainMenuScreen {
         screen.clear();
         TextGraphics g = screen.newTextGraphics();
 
-        // ASCII Art Title
         g.setForegroundColor(TextColor.ANSI.RED);
         g.putString(15, 2, "  ____                       _        ____                        ");
         g.putString(15, 3, " / ___|___  _ __  ___  ___  | | ___  |  _ \\  ___   ___  _ __ ___  ");
@@ -65,13 +59,11 @@ public class MainMenuScreen {
         g.putString(15, 5, "| |__| (_) | | | \\__ \\ (_) || |  __/ | |_| | (_) | (_) | | | | | |");
         g.putString(15, 6, " \\____\\___/|_| |_|___/\\___/ |_|\\___| |____/ \\___/ \\___/|_| |_| |_|");
 
-        // User info
         SecurityContext.getInstance().getCurrentUser().ifPresent(user -> {
             g.setForegroundColor(TextColor.ANSI.CYAN);
             g.putString(2, 8, "Welcome, " + user.getNickname() + " [" + user.getRole() + "]");
         });
 
-        // Menu items
         int y = 11;
         for (int i = 0; i < menuItems.size(); i++) {
             MenuItem item = menuItems.get(i);
@@ -86,7 +78,6 @@ public class MainMenuScreen {
             y += 2;
         }
 
-        // Controls
         g.setForegroundColor(TextColor.ANSI.BLACK_BRIGHT);
         g.putString(25, y + 2, "Use ↑↓ to navigate, Enter to select");
 

@@ -1,4 +1,3 @@
-// src/main/java/com/consoledoom/service/AdminService.java
 package com.consoledoom.service;
 
 import com.consoledoom.db.GameSessionDAO;
@@ -14,10 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * Admin operations service with security checks.
- * Follows Open/Closed Principle - can extend without modifying.
- */
 public class AdminService {
     private final UserDAO userDAO;
     private final GameSessionDAO sessionDAO;
@@ -29,9 +24,6 @@ public class AdminService {
         this.securityContext = SecurityContext.getInstance();
     }
 
-    /**
-     * Gets all users - secured operation.
-     */
     public List<User> getAllUsers() {
         return executeSecured(
                 Permission.VIEW_ALL_USERS,
@@ -45,15 +37,11 @@ public class AdminService {
                 });
     }
 
-    /**
-     * Deletes a user - secured operation.
-     */
     public OperationResult deleteUser(int userId) {
         if (!securityContext.hasPermission(Permission.DELETE_USERS)) {
             return OperationResult.failure("Access denied: Admin permission required");
         }
 
-        // Can't delete yourself
         if (securityContext.getCurrentUser()
                 .map(u -> u.getId() == userId)
                 .orElse(false)) {
@@ -70,9 +58,6 @@ public class AdminService {
         }
     }
 
-    /**
-     * Deletes a game record - secured operation.
-     */
     public OperationResult deleteGameRecord(int sessionId) {
         if (!securityContext.hasPermission(Permission.DELETE_GAME_RECORDS)) {
             return OperationResult.failure("Access denied: Manager permission required");
@@ -88,9 +73,6 @@ public class AdminService {
         }
     }
 
-    /**
-     * Updates user role - secured operation.
-     */
     public OperationResult updateUserRole(int userId, Role newRole) {
         if (!securityContext.hasPermission(Permission.MANAGE_ROLES)) {
             return OperationResult.failure("Access denied: Admin permission required");
@@ -106,9 +88,6 @@ public class AdminService {
         }
     }
 
-    /**
-     * Gets all game records with scores.
-     */
     public List<LeaderboardEntry> getAllGameRecords() {
         return executeSecured(
                 Permission.DELETE_GAME_RECORDS,
@@ -122,10 +101,6 @@ public class AdminService {
                 });
     }
 
-    /**
-     * Executes operation only if user has required permission.
-     * Uses lambda for deferred execution.
-     */
     private <T> T executeSecured(Permission permission, Supplier<T> operation) {
         if (!securityContext.hasPermission(permission)) {
             throw new SecurityException("Access denied: requires " + permission);
@@ -133,16 +108,10 @@ public class AdminService {
         return operation.get();
     }
 
-    /**
-     * Checks if current user can access admin panel.
-     */
     public boolean canAccessAdminPanel() {
         return securityContext.hasPermission(Permission.VIEW_ADMIN_PANEL);
     }
 
-    /**
-     * Result of admin operations.
-     */
     public static class OperationResult {
         private final boolean success;
         private final String message;

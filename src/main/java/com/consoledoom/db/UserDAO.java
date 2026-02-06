@@ -11,14 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Data Access Object for User operations with secured endpoints.
- */
 public class UserDAO {
-
-    /**
-     * Registers a new user with validation.
-     */
     public int registerUser(String nickname, String passwordHash) throws SQLException {
         String sql = """
                     INSERT INTO users(nickname, password_hash, role)
@@ -40,9 +33,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Authenticates user and returns User object if successful.
-     */
     public Optional<User> authenticate(String nickname, String passwordHash) throws SQLException {
         String sql = """
                     UPDATE users SET last_login = NOW()
@@ -64,9 +54,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Finds user by nickname.
-     */
     public Optional<User> findByNickname(String nickname) throws SQLException {
         String sql = "SELECT * FROM users WHERE nickname = ?";
 
@@ -83,9 +70,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Gets all users - requires ADMIN permission.
-     */
     @SecuredEndpoint(requiredPermissions = { Permission.VIEW_ALL_USERS }, minimumRole = Role.MANAGER)
     public List<User> getAllUsers() throws SQLException {
         String sql = "SELECT * FROM users ORDER BY created_at DESC";
@@ -101,9 +85,6 @@ public class UserDAO {
         return users;
     }
 
-    /**
-     * Deletes a user - requires ADMIN permission.
-     */
     @SecuredEndpoint(requiredPermissions = { Permission.DELETE_USERS }, minimumRole = Role.ADMIN)
     public boolean deleteUser(int userId) throws SQLException {
         String sql = "DELETE FROM users WHERE user_id = ? AND role != 'ADMIN'";
@@ -115,9 +96,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Updates user role - requires ADMIN permission.
-     */
     @SecuredEndpoint(requiredPermissions = { Permission.MANAGE_ROLES }, minimumRole = Role.ADMIN)
     public boolean updateUserRole(int userId, Role newRole) throws SQLException {
         String sql = "UPDATE users SET role = ?::user_role WHERE user_id = ?";
@@ -130,9 +108,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Checks if nickname exists.
-     */
     public boolean nicknameExists(String nickname) throws SQLException {
         String sql = "SELECT 1 FROM users WHERE nickname = ?";
 

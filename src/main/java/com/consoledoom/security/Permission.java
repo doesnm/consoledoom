@@ -1,9 +1,5 @@
-// src/main/java/com/consoledoom/security/Permission.java
 package com.consoledoom.security;
 
-/**
- * Fine-grained permissions for role-based access control.
- */
 public enum Permission {
     // Player permissions
     PLAY_GAME,
